@@ -4,10 +4,11 @@ public class Bus {
     static int max_guest;
     static int cur_guest;
     static int price;
-    UUID bus_uniqueID;
+    static UUID bus_uniqueID;
     static int cur_gas;
     static int cur_speed;
     static boolean bus_status; //true when driving, false going back to garage
+
     public Bus(){
         max_guest=10;
         cur_guest=0;
@@ -16,6 +17,7 @@ public class Bus {
         cur_gas=100;
         cur_speed=0;
         bus_status=true; //true when driving, false going back to garage
+        System.out.printf("버스 ID <%s> 가 생성되었습니다.%n", bus_uniqueID);
     }
     public static void Drive(boolean status){
         Bus.bus_status = status;
@@ -74,5 +76,7 @@ public class Bus {
     }
 
     public static void main(String[] args){
+        Bus bus = new Bus();
+        System.out.println(Bus.bus_uniqueID);
     }
 }
