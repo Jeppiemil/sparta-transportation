@@ -1,80 +1,65 @@
 package com.example.taxi;
 
-import java.util.UUID;
+import com.example.publictransportation.PublicTransportation;
 
-
-public class Taxi {
-    boolean cur_guest; //true when with customer, false without
-
-    int price;
-    int additional_price_perKM;
-    UUID taxi_uniqueID;
-    int cur_gas;
-    int cur_speed;
-    boolean taxi_status; //true when driving, false going back to garage
-
+public class Taxi extends PublicTransportation {
+    static int count;
+    int uniqueID;
+    int drive_status;
     String destination;
-    int destination_KM;
+    int destination_km;
+    int default_km;
+    int default_price;
+    int additional_price;
+    int total_payment;
+    int total_income;
+    int max_guest;
+    int cur_guest;
+    int cur_gas;
+
 
     public Taxi(){
-        cur_guest=false;
-        price=2000;
-        taxi_uniqueID = UUID.randomUUID();
-        cur_gas=100;
-        cur_speed=0;
-        taxi_status = true; //true when driving, false going back to garage
-        System.out.printf("버스 ID <%s> 가 생성되었습니다.%n", taxi_uniqueID);
+        count += 1;
+        this.uniqueID = count;
+        this.default_km = 1;
+        this.default_price = 3000;
+        this.additional_price = 1000;
+        this.drive_status=1;
+        this.max_guest = 4;
+        this.cur_guest = 0;
+        this.total_income =0;
+        this.cur_gas = 100;
+        System.out.printf("현재 상태는 %d, 주유량은 %d 입니다.%n", this.drive_status, this.cur_gas);
     }
-    public void Drive(boolean status){
-        taxi_status = status;
-        if (taxi_status ==false){
-            cur_gas = 100;
-            cur_guest = false;
-            cur_speed = 0;
-            System.out.println("차량이 차고지로 이동하여 주유량이 100, 현재 승객 수가 0, 현재 속도가 0이 되었습니다.");
+
+    public void ChangeGuest(int count, String guest_destination, int guest_km){
+        if (drive_status == 0){
+            System.out.println("이미 승객이 타고 있습니다.");
+        } else if (max_guest < count){
+            System.out.println("최대 승객 수 초과로 탑승할 수 없습니다.");
         } else {
-            cur_gas -= 46;
-            if (cur_gas < 10 && cur_gas > 0){
-                System.out.println("주유량 10 미만. 주유가 필요합니다.");
-            } else if (cur_gas <= 0) {
-                System.out.print("주유량 0. 차고지로 이동합니다. ");
-                Drive(false);
-            } else {
-                System.out.println("운행을 시작합니다.");
-            }
-        }
-    }
-    public void ChangeSpeed(int speed_delta){
-        if (taxi_status ==false){
-            System.out.println("차량이 차고지에 있습니다. 먼저 Drive로 운행을 시작해주세요.");
-        }
-        else if (cur_gas < 10){
-            System.out.println("주유량 10 미만으로 속도 변경이 불가합니다. 주유량을 확인하세요.");
-        } else {
-            cur_speed += speed_delta;
-            if (cur_speed < 0) {
-                cur_speed = 0;
-                System.out.println("속도를 모두 줄여 차량이 정지합니다.");
-            } else {
-                System.out.printf("속도 변경을 완료했습니다. 변경된 현재 속도는 %d입니다.%n", cur_speed);
-            }
+            this.drive_status = 0;
+            this.cur_guest += count;
+            this.destination = guest_destination;
+            this.destination_km = guest_km;
+            this.total_payment = this.default_price + (this.destination_km - this.default_km) * this.additional_price;
+            this.total_income += this.total_payment;
+            System.out.printf("%d명 탑승하여 잔여 승객 수는 %d%n", this.cur_guest, this.max_guest - this.cur_guest);
+            System.out.printf("목적지는 %s으로 %dkm 떨어져 있어 기본요금 %d에 추가요금이 붙어 %d원을 지불하셔야 합니다.%n", this.destination, this.destination_km, this.default_price, this.total_payment);
+            System.out.printf("%d번 차량 운행 시작합니다.%n",this.uniqueID);
+
         }
     }
 
-    public void AddGuest(String customer_destination, int customer_destination_KM) {
-        if (taxi_status == false) {
-            System.out.println("차량이 차고지에 있습니다. 먼저 Drive로 운행을 시작해주세요.");
-        } else if (cur_guest = true) {
-            System.out.println("이미 승객이 탑승하고 있어 다른 승객 탑승이 어렵습니다.");
-        } else {
-            cur_guest = true;
-            destination = customer_destination;
-            destination_KM = customer_destination_KM;
-        }
+    public void LeaveGuest(){
+        System.out.printf("목적지에 도달했습니다. 총 요금은 %d원 입니다. ", this.total_payment);
+        this.drive_status = 1;
+        this.cur_guest = 0;
+        this.total_payment = 0;
+        this.destination = "";
+        this.destination_km = 0;
+        System.out.printf("현재까지 벌어들인 누적요금은 총 %d원 입니다.%n", this.total_income);
+        Drive(1, 0);
     }
 
-    public static void main(String[] args){
-        com.example.taxi.Taxi taxi = new Taxi();
-        System.out.println(taxi.taxi_uniqueID);
-    }
 }
